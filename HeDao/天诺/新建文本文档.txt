@@ -1,0 +1,333 @@
+中转机 10.1.0.39 my\yw01  yw#001
+
+10.1.0.46的服务器的中转机  10.1.16.43 账号administrator 密码admin123@
+10.1.0.43的服务器的中转机   10.1.16.43 administrator密码admin123@
+
+
+远程桌面登录10.1.0.39
+用户名：my\admin_mc
+密码：bggl
+
+bggl#002
+
+--营销费用
+10.1.0.46  sa  sa  合生营销费用
+
+use MC
+go
+select * from TbCostPlanSingle where TbCostPlanSingleoid='c567a3a8-9994-4e2c-80d0-50a75655e065'   
+ 查费用预算的状态
+
+update a set IsConfirm=null from TbCostPlanSingle a where TbCostPlanSingleoid='00008e77-0000-0000-0000-0000b73f4492’
+  调成是审批状态
+
+月度立项回撤
+update TbCostPlan set yd_lx_zt=null,H3_FlowID=null,H3_FlowName=null,H3_UserCode=null,H3IsApproveAgree=null,H3IsApproveEnd=null,State=0 where TbCostPlanOID='AAAAAA'
+其中AAAAAA是URL中的参数skey
+
+
+单独立项回撤
+update [TbCostPlanSingle] set H3_FlowID=null,FlowId=null,FlowInId=null,FlowIdName=null,ApproveUser=null,OAApproveState=null,OAApproveEnd=null,ApproveUserName=null,IsConfirm=null  where TbCostPlanSingleOID='AAAAAA'
+其中AAAAAA是URL中的参数TbCostPlanSingle_FK
+
+
+不出现提交下一步的情况:
+
+update TbCostPlan set State=99,H3IsApproveEnd=null where TbCostPlanOID='deae3dcd-da50-48f0-849c-ef8737649986'
+其中AAAAAA是URL中的参数skey
+
+
+
+没有推送到PM的  执行以下 sql ：
+PROC_Send_Mctbcostpay_To_Pm     'AAAAAA'
+AAAAA是费用编号，比如   'OG00000001230431'
+
+
+
+
+
+---营销管理系统 （珠江/合生）
+
+10.1.0.45 
+EAS 票据推送
+查询
+use tnfc270
+go
+select * from T_MID_RECEIVINGBILL where FImageBarcode='AAA'
+
+
+update a set FSTATUS=0  from T_MID_RECEIVINGBILL a  where FImageBarcode='AAA'
+询eas导入是否成功  状态为5是成功的 状态为0是待推送  状态为2 是回退回来   (所以要手工推送,就要将状态设置为0)
+
+
+NC 查询
+use tnfc270
+go
+select * from ex_receipt_h  where yxtmCode='AAA' 查询nc导入是否成功  状态为5是成功的
+yxtmCode是影像条形码
+
+
+
+update ex_receipt_h set state=0 where yxtmCode='AAA' 
+
+
+
+客户名字修改，更新到诚意金合同
+use tnfc270
+go
+ update Intent_Client set name='AAA' where intent_code='BBB'
+AAA是修改名之后新的名字，BBB是诚意金单的主键 
+
+
+
+新增重复补差修复工具：       http://10.1.0.43/tnfc/tool/BUCHA.asp
+发contract_code 
+
+用工具处理吧
+
+
+财务NC查看天诺推送情况,image_code为NC条形码
+http://10.1.0.43/tnfc/tool/ygz_zj.asp?act=search&image_code=ZA0604SR2016090800011&act1=1
+
+
+
+查询条形码工具 是否是已经付款成功（是否有回退）只能查合生。
+
+http://10.1.0.43/tnfc/tool/EAS.asp?act=search&image_code=
+
+
+10.1.0.45  sa  1qaz!QAZ 用中转机远程sql服务器查询珠江
+
+
+----营销短信（营销管理系统人员使用）
+
+10.1.19.4  sa 1qaz!QAZ 用中转机远程sql服务器查询珠江/合生
+
+查询电话号码收短信的记录
+
+use SMSEngine
+go
+select * from sendhistory where mobile like'电话号码'
+
+http://10.1.16.80 玄武短信平台
+用户名：wxf  密码：x123456w
+
+
+增加天诺用户
+select CODE,USERNAME as '用户名',OWNNAME '姓名',GROUPS '地区',ROLES '角色',PASSWORD '密码',STATUS '状态0启用1停用',MOBILE '手机号',con_emp_num '300133' from USERS where STATUS=0 
+Insert INTO USERS(CODE,USERNAME,OWNNAME,GROUPS,ROLES,PASSWORD,STATUS) values('1111667','xsez','合生销售二组','',null,'111111',0)
+
+
+
+修改付审单的状态(如本来已经流程走完了,还是处于审批中)
+update   PM_OAMission   set OA_ISPass='1',OA_ISFinish='1'  where pm_oid='4058'  
+这个是更新 天诺状态为  审批完成
+
+pm_oid  等于 http://10.1.0.43/tnfc/contract/Addfukuanspb_view.asp?proj_code=P134&act=edit&OAMission_code=4058 中的  OAMission_code
+
+http://10.1.0.43/tnfc/contract/Addfukuanspb_view.asp?proj_code=P141&act=edit&OAMission_code=4667
+
+删除 已填报 但为发起的 付款审批  (撤销未发起的付款审批)
+delete  contract_oamission where OAMission_code=4667
+delete  OAMission where OAMission_code=4667
+delete  PM_OAMission where PM_OID=4667
+4667   就是 链接中的  OAMission_code 
+
+http://10.1.0.105/ 旧OA地址
+
+
+工具: 
+http://10.1.0.43/tnfc/tool/eas.asp?image_code=H01102SR2016070700433
+
+
+合生财务系统EAS的，天诺系统推送至EAS的收款，根据条码查询；
+用途：
+1.财务人员误操作删除了天诺收款，用这地址可以重新推送
+2.财务人员反映收款数据没有推送至EAS时，用这地址可以查询实时推送状态
+3.由于一些冲红换票误操作推送至EAS款项符号不正确，先要求财务人员删除错误单据后，用这地址可以纠正正负号，正确后再推送 
+
+软件五-徐裕君 2016-1-21 14:59:16
+http://10.1.0.43/tnfc/tool/BUCHA.asp
+根据合同主键 contract_code ，对改合同的补差数据，修正以及删除。
+
+
+
+
+如果 在天诺里 ,客户退款里 看不到 新增的
+
+update pay_plan  set DC_type='1'  where PAY_PLAN_CODE='1945520' 
+
+update   这个DC_type字段=1
+
+
+
+情景:  如果一客户提前退租,另一客户进行签约,但是因为前一客户的租期问题无法让另一客户签约的处理:
+
+ 在数据库后台处理
+
+
+select zu_finish_date from ROOMS where ROOM_CODE='321233';
+--select * from ROOMS where zu_finish_date='2018-06-16 00:00:00.000';
+--update  ROOMS set zu_finish_date='2016-02-26 00:00:00.000' where ROOM_CODE='321233';
+--select * from contract_room_zu  where  contract_zu_code='3405';
+
+
+修改结转日期，如果在报表里面没有体现项目信息，P046是项目编号
+http://10.1.0.43/tnfc/project/page_changeKoujingDate.asp?proj_code=P046
+
+
+
+情景:  业务在mc上错误填写内容,需要再编辑,发现"已推送到PM"的勾已经勾选,现已经在PM删除了该数据,只要在mc数据库上执行以下SQL,那么就会取消此勾选
+从mc网页链接上获取OID
+http://10.1.0.46/mc/BPO_TbCostPay_Eidt_new.aspx?OID=000d2959-0000-0000-0000-000016ac9c62&OrgName=%E6%98%86%E5%B1%B1%E9%A1%B9%E7%9B%AE&SYS_ORG=0005564a-0000-0002-0000-0000597e8272
+
+
+执行SQL:
+update  TbCostPay set Auditing_State=0 where TbCostPayOID=''
+
+update  TbCostPay set Auditing_State=0 where TbCostPayOID='000d2959-0000-0000-0000-000016ac9c62'
+
+update  TbCostPay set Auditing_State=0 where TbCostPayOID='00043a86-0000-0000-0000-00001647768c'
+
+
+要求后台修改客户多减面积补差
+
+http://10.1.0.43/tnfc/tool/bucha.asp
+
+
+正负错误(先需从eas上删除)
+10.1.0.43/tnfc/tool/EAS.asp
+
+
+
+
+update BackPrice_intent set H3_state='99' where proj_code='P046' and Back_code='1865' 
+
+修改审批中心的流程状态
+
+
+
+
+异常收款记录删除
+1.没有删除按钮 ,通知业务联系财务删除数据
+2. 不通知财务删除,后台删除数据
+http://10.1.0.43/tnfc/account/account_modi_hszj.asp?account_code=1171720&room_code=262990  
+
+取到  account_code
+
+执行 sql:    
+delete account where account_code=1171720
+delete account_price where account_code=1171720
+delete account_plan where account_code=1171720
+
+(三个sql都要执行)
+
+一般我是建议用1的方案。如果他们很烦不肯去弄  又有单确定要删这笔 就用2吧
+
+
+异常开票记录删除
+
+
+
+天诺:
+
+情景: 某销售人员在某月份销售的认购在佣金比例中查询不到，
+http://10.1.0.43/tnfc/contract/contract_detail.asp?contract_code=248930&proj_code=P164 
+ 
+
+
+解决方法: 
+
+ exec   SP_OperatorJongJiFenBei_Rate_update  'P164','2016-3-31'
+两个参数：   P164 是项目编码主键   ，后面那个是 所属月份的最后一天
+
+说明:
+更新佣金的所有信息,包括佣金比例,刷新业绩,更新业务员 、更新佣金比例、更新金额等
+佣金一般是每个月最后一天计算的;
+只计算一次。如果隔月有修改信息  佣金不会自动更新的;
+
+
+面积补差修改
+
+合生前滩一号项目10幢33号1202室黄江东，该客户面积补差有错误，连续确认四次面积补差导致实测面积多减了3个0.26平方，但是补差款正确，所以现在要求后台修改黄江东客户多减面积补差 
+
+
+http://10.1.0.43/tnfc/tool/BUCHA.asp
+输入合同号的:
+
+http://10.1.0.43/tnfc/contract/contract_detail.asp?contract_code=198724
+
+先删了其他三个  再把  -11280  改成  -9776   然后按保存
+
+
+天诺认购书,禁用多余的认购书
+
+select  * from print_word_url   where proj_code='P134'
+
+
+update print_word_url set status=0 where id in   (239,240,241,242,243,244,246)
+
+
+修改房源楼栋的计划交房时间: (批量修改)
+
+  update c set c.give_date=' 2017-04-30' 
+  from contract c join rooms r on c.room_code=r.room_code
+ where (build_code='B6004' or build_code='B6003') 
+
+
+
+
+修改
+
+
+zabbix网站首页打开测试
+curl -o /dev/null -s -w "%{http_code}""\n"   http://10.1.0.46/MC/
+
+
+for /f "tokens=2 delims=- "  %%a in ('%MySQLPath%\mysql -uroot -p123456  -e "show variables like 'key_buffer_size';"| findstr /V Value') do echo %%b
+
+
+
+
+
+
+
+旧OA:
+
+
+
+http://10.1.0.104/portal/Login/enter.jsp
+
+http://10.1.0.105/portal/Login/enter.jsp
+
+http://10.1.0.106/portal/stPortal/default.jsp
+
+
+查询用户权限
+
+select * from users where  roles in (select code from roles where role_name like 'AA%') and status=0
+
+修改system用户地区属性为珠江集团总部
+update  USERS set GROUPS=23 where USERNAME = 'system'
+
+
+
+查看权限表
+select * from SYS_MODULE   where MODULE='销售管理'
+
+pgsql优化案例
+http://blog.163.com/digoal@126/blog/static/163877040201221382150858/
+
+http://blog.163.com/digoal@126/blog/static/163877040201221333411196/
+
+
+http://10.1.19.167:8888/zjliangshu/   珠江两书UAT 工号 ，admin
+
+http://10.1.19.167:8888/hsliangshu/   合生两书UAT  工号 ，admin
+
+
+{10.1.19.132:web.test.rspcode[珠江协同工作系统--首页监控,访问珠江协同工作系统 http://10.1.19.132/zjxietong/a].min(180)}<>200
+and
+{10.1.19.132:web.test.rspcode[珠江协同工作系统--首页监控,访问珠江协同工作系统 http://10.1.19.132/zjxietong/a].time(0)}>060000
+and
+{10.1.19.132:web.test.rspcode[珠江协同工作系统--首页监控,访问珠江协同工作系统 http://10.1.19.132/zjxietong/a].time(0)}<220000
